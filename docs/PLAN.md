@@ -14,6 +14,7 @@ src/
     allowance.ts   paydays(kid, today) -> ISO dates; allowance tx ids
     balance.ts     balances per kid from transactions
     goals.ts       progress (capped 0..1)
+    rowhash.ts     canonical string + SHA-256 (Web Crypto), verify/sign a row
     schema.ts      row <-> object codecs for each tab, header constants
   google/        thin fetch wrappers around REST, take a token, throw typed errors
     auth.ts        GIS token client, token cache, silent refresh
@@ -48,10 +49,19 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
   `insertDataOption: INSERT_ROWS`). Never write a computed balance.
 - **Dedupe on read**: two parents can both append the same allowance row in
   a race. Balance code keeps the first row per `id` and ignores the rest.
-  The deterministic id makes this safe.
-- **Hand-edited rows are normal input**: codecs must tolerate blank cells,
-  `TRUE`/`true`/`1`, trailing spaces, and unknown extra columns. Invalid
-  rows are skipped and counted, shown as a warning, never a crash.
+  The deterministic id makes this safe. The Sheets API has no conditional
+  write, so this is the ceiling; see "Concurrency" in the spec.
+- **Row hash**: every data row ends with `hash`. Codecs verify it and drop
+  rows that fail, counting them for a warning. Hashing runs over the
+  normalized parsed values, not the raw cell text, so `12.5` vs `12.50`
+  from Sheets formatting does not cause false rejections. `rowhash.ts` is
+  the only place that knows the canonical format; test vectors are pinned
+  in its test file so the format cannot drift silently.
+- **Hand-edited rows are hostile input**: codecs must tolerate blank cells,
+  `TRUE`/`true`/`1`, trailing spaces, and unknown extra columns without
+  crashing, then reject anything that fails the hash.
+- **Conflict check on row updates**: re-read the row before `values.update`
+  and abort if `updatedAt` differs from the value loaded into the form.
 - **Header check**: on load, compare row 1 of each tab against the schema
   constants and show a clear error if a tab or column is missing.
 - **Auth**: keep the token in memory only. One `http.ts` wrapper handles
@@ -92,8 +102,11 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
 - `.env.example`.
 
 ### 1. Domain (no UI)
+- `rowhash.ts`: `canonical(fields)`, `hashRow(fields)`, `verifyRow(row)`.
+  Uses `crypto.subtle.digest`, so codecs are async. Pinned test vectors.
 - `schema.ts`: tab names, header arrays, `Kid`, `Transaction`, `Goal`,
-  `Settings` types, `parseKidRow`/`kidToRow` etc.
+  `Settings` types, `parseKidRow`/`kidToRow` etc. Parsers return
+  `{ ok, value } | { ok: false, reason }` so callers can count rejects.
 - `money.ts`, `balance.ts`, `goals.ts`.
 - `allowance.ts`: `paydays(frequency, day, startDate, today)`. Weekly:
   first date >= startDate whose weekday = day, then +7. Monthly: day of
@@ -118,8 +131,9 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
 - `bootstrap.ts`: cached fileId -> `files.get` (drop cache on 404/403);
   else `files.list` with the `appProperties` query; 0/1/many handling.
 - `createFamilySheet(name, currency)`: `spreadsheets.create` with the four
-  tabs, write header rows and settings via `values.batchUpdate`, then
-  Drive `files.update` to set `appProperties`.
+  tabs, write header rows and settings via `values.batchUpdate`, add a
+  `warningOnly` protected range on each data tab, then Drive
+  `files.update` to set `appProperties`.
 - Setup screen (family name, default currency, first kid).
 
 ### 4. Read path and screens
@@ -134,8 +148,9 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
   the row range), `addGoal`/`updateGoal`.
 - Transaction dialog, Goal dialog, Add/Edit kid screen. Currency field is
   disabled once the kid has any transaction.
-- `crediting.ts`: on load and on refresh, for each active kid compute
-  paydays, diff against existing ids, append missing, then reload.
+- `crediting.ts`: parents only. On load and on refresh, after a fresh
+  read and a short idle delay, for each active kid compute paydays, diff
+  against existing ids, append missing (with hashes), then reload.
 - Optimistic UI is not needed; reload after each write is simpler and
   matches "sheet is the truth".
 
@@ -164,6 +179,11 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
   results in the PR.
 
 ## Known risks
+
+- The row hash is public and unsalted. It is tamper evidence, not tamper
+  proofing. Do not describe it as security in the UI or README.
+- Ignoring a bad transaction row changes a balance. The warning must be
+  loud and name the tab and row number so a parent can fix it.
 
 - Picker `setFileIds` on `DocsView` requires the picker to be opened with
   the same OAuth token; if the invited user has not accepted the Drive

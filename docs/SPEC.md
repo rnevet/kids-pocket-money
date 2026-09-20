@@ -45,8 +45,8 @@ Tabs (row 1 = headers):
 | defaultCurrency | ISO 4217 code, e.g. ILS |
 
 ### `kids`
-| id | name | avatar | currency | allowanceAmount | allowanceFrequency | allowanceDay | startDate | archived |
-|---|---|---|---|---|---|---|---|---|
+| id | name | avatar | currency | allowanceAmount | allowanceFrequency | allowanceDay | startDate | archived | updatedAt | hash |
+|---|---|---|---|---|---|---|---|---|---|---|
 
 - `id`: uuid
 - `avatar`: emoji
@@ -55,10 +55,11 @@ Tabs (row 1 = headers):
 - `allowanceDay`: weekly = 0-6 (0 = Sunday), monthly = 1-28
 - `startDate`: ISO date, first possible payday
 - `archived`: TRUE/FALSE (no hard delete)
+- `updatedAt`: ISO timestamp of the last app write, used for conflict detection
 
 ### `transactions`
-| id | kidId | date | amount | type | note | createdBy | createdAt |
-|---|---|---|---|---|---|---|---|
+| id | kidId | date | amount | type | note | createdBy | createdAt | hash |
+|---|---|---|---|---|---|---|---|---|
 
 - `amount`: decimal, positive = deposit, negative = withdrawal
 - `type`: `allowance` / `deposit` / `withdrawal` / `adjustment`
@@ -67,13 +68,25 @@ Tabs (row 1 = headers):
 - Balance = sum of `amount` for the kid. Never stored.
 
 ### `goals`
-| id | kidId | name | price | status | createdAt |
-|---|---|---|---|---|---|
+| id | kidId | name | price | status | createdAt | updatedAt | hash |
+|---|---|---|---|---|---|---|---|
 
 - `status`: `active` / `done` / `deleted`
 - Goal price is in the kid's currency.
 
 Money math: convert to integer minor units (cents/agorot) in code, never add floats. Write back with 2 decimals.
+
+### Row hash (tamper evidence)
+
+Every row in `kids`, `transactions` and `goals` ends with a `hash` column written by the app.
+
+- `hash` = first 16 hex chars of SHA-256 over `"v1" + 0x1F + <fields in header order, normalized, joined by 0x1F>`.
+  Normalization: amounts as `-?\d+\.\d{2}`, dates as ISO, booleans as `TRUE`/`FALSE`, strings trimmed. The `hash` column itself is excluded.
+- On read, a row whose recomputed hash does not match is **ignored** (not counted in balances, not shown). The app shows a warning with the count of ignored rows per tab and a link to the sheet.
+- On any app write (append or row update) the hash is recomputed.
+- The sheet is additionally protected with `addProtectedRange` (`warningOnly: true`) on each data tab so Google Sheets shows a warning dialog before a manual edit. It does not block edits; the hash is what enforces.
+
+Limits, stated plainly: this is a static app, so the hash scheme is public and unsalted. It catches accidental edits, Sheets auto-conversion damage, and casual tampering. A parent with edit rights who knows the scheme can forge a valid hash. Kid viewers cannot edit the sheet at all (Drive `reader`), so they cannot tamper. Real enforcement would need a server or Apps Script, both out of scope for MVP.
 
 ## Multi-currency (simple)
 
@@ -94,6 +107,18 @@ No server, so crediting happens on app load (and on manual refresh):
 
 The deterministic id prevents double credit when two parents open the app at the same time.
 Changing the allowance amount affects future paydays only.
+
+### Concurrency (what the Sheets API gives us)
+
+The Sheets API has no conditional write (no ETag / compare-and-swap on values), so races cannot be eliminated from the client. They are made harmless instead:
+
+- `values.append` is a single server-side operation that locates the end of the table; two concurrent appends both land, nothing is lost. The only outcome of a race is a duplicate row.
+- **Duplicate allowance rows**: readers keep the first row per `id` (sheet order) and ignore the rest. Balances are correct even with duplicates present. Rows are never deleted.
+- **Crediting only by parents**, once per app load, after a fresh read, and only after the app has been idle on the Home screen for ~1 s. This shrinks the window; it does not close it.
+- **Kid / goal row updates** (`values.update`) are last-write-wins. Each row carries `updatedAt`; the app re-reads the row immediately before writing and refuses the write if `updatedAt` changed since the form was opened ("someone else changed this kid, reload"). A sub-second window remains.
+- Transactions are append-only so they never have this problem. Corrections are new rows.
+
+Anything stronger (true mutual exclusion) requires a Google Apps Script bound to the sheet using `LockService`, deployed as a web app per family. That is a backend and is out of scope for MVP.
 
 ## Roles
 
@@ -169,4 +194,5 @@ Loans, chores/bonuses, educational content, offline editing, exchange rates, not
 - Invited kid viewer sees data but no edit controls; Drive API writes from that account fail gracefully.
 - Switching OS language between Hebrew and English flips text and layout direction with no broken alignment.
 - Theme follows OS and the manual override persists across reloads.
-- Editing the sheet by hand (adding a transaction row) is reflected in the app after reload.
+- Editing a transaction row by hand (changing the amount) causes that row to be ignored after reload, with a visible warning; the rest of the data is unaffected.
+- Two browsers as two parents load the app at the same moment on a payday: at most one allowance credit is counted per kid per payday, even if two rows exist in the sheet.
