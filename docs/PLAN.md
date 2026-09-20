@@ -94,6 +94,7 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
 ## Steps
 
 ### 0. Scaffold
+
 - `npm create vite@latest` (react-ts), strict TS, ESLint + Prettier,
   Vitest, stylelint with logical-props rule.
 - GitHub Actions: lint, typecheck, test, build on push.
@@ -102,6 +103,7 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
 - `.env.example`.
 
 ### 1. Domain (no UI)
+
 - `rowhash.ts`: `canonical(fields)`, `hashRow(fields)`, `verifyRow(row)`.
   Uses `crypto.subtle.digest`, so codecs are async. Pinned test vectors.
 - `schema.ts`: tab names, header arrays, `Kid`, `Transaction`, `Goal`,
@@ -116,6 +118,7 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
   yields 3 or 4 paydays depending on weekday.
 
 ### 2. Google layer
+
 - `auth.ts`: load GIS script, `initTokenClient` with `drive.file`,
   `requestAccessToken({prompt: ''})` for refresh, expose `getToken()`
   and `signIn()`/`signOut()` (`revoke`).
@@ -128,6 +131,7 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
   create a sheet, read it back.
 
 ### 3. Sheet bootstrap
+
 - `bootstrap.ts`: cached fileId -> `files.get` (drop cache on 404/403);
   else `files.list` with the `appProperties` query; 0/1/many handling.
 - `createFamilySheet(name, currency)`: `spreadsheets.create` with the four
@@ -137,6 +141,7 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
 - Setup screen (family name, default currency, first kid).
 
 ### 4. Read path and screens
+
 - `repository.loadFamily()`: one `batchGet` over all tabs, run codecs,
   compute balances, return a `Family` object plus warnings.
 - `state/`: context with `family`, `role`, `user`, `status`, `refresh()`.
@@ -144,6 +149,7 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
 - Kid-viewer role already works here with no edit controls.
 
 ### 5. Writes
+
 - `appendTransactions`, `addKid`/`updateKid` (find row by id, `values.update`
   the row range), `addGoal`/`updateGoal`.
 - Transaction dialog, Goal dialog, Add/Edit kid screen. Currency field is
@@ -155,6 +161,7 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
   matches "sheet is the truth".
 
 ### 6. i18n, RTL, theme
+
 - i18next with `en` and `he`, detection from `navigator.languages`,
   override in localStorage. On change set `<html lang dir>`.
 - Theme: `data-theme` on `<html>`, `prefers-color-scheme` listener,
@@ -162,6 +169,7 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
 - Walk every screen in Hebrew and check alignment.
 
 ### 7. Sharing and join
+
 - Settings > Family members: `permissions.list`, `permissions.create`
   (`role: writer|reader`, `type: user`, `sendNotificationEmail: true`,
   `emailMessage` with `?join=<fileId>`), `permissions.delete`.
@@ -171,6 +179,7 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
 - Test with a second Google account added as a test user.
 
 ### 8. PWA and release
+
 - `vite-plugin-pwa` with `manifest.webmanifest`, icons, app-shell caching
   only (no data caching).
 - Cloudflare Pages project, env vars set there, production origin added to

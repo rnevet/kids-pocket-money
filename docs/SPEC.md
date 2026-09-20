@@ -19,6 +19,7 @@ The parent is the bank. No real money moves; the app only records a virtual bala
 - PWA manifest + service worker for install-to-home-screen (no offline data sync in MVP)
 
 Config via env vars:
+
 - `VITE_GOOGLE_CLIENT_ID`
 - `VITE_GOOGLE_API_KEY` (for Picker)
 - `VITE_GOOGLE_APP_ID` (Cloud project number, for Picker)
@@ -39,14 +40,16 @@ Set Drive `appProperties: { pocketMoneyApp: "1", schemaVersion: "1" }` on the fi
 Tabs (row 1 = headers):
 
 ### `settings`
-| key | value |
-|---|---|
-| familyName | string |
+
+| key             | value                   |
+| --------------- | ----------------------- |
+| familyName      | string                  |
 | defaultCurrency | ISO 4217 code, e.g. ILS |
 
 ### `kids`
-| id | name | avatar | currency | allowanceAmount | allowanceFrequency | allowanceDay | startDate | archived | updatedAt | hash |
-|---|---|---|---|---|---|---|---|---|---|---|
+
+| id  | name | avatar | currency | allowanceAmount | allowanceFrequency | allowanceDay | startDate | archived | updatedAt | hash |
+| --- | ---- | ------ | -------- | --------------- | ------------------ | ------------ | --------- | -------- | --------- | ---- |
 
 - `id`: uuid
 - `avatar`: emoji
@@ -58,8 +61,9 @@ Tabs (row 1 = headers):
 - `updatedAt`: ISO timestamp of the last app write, used for conflict detection
 
 ### `transactions`
-| id | kidId | date | amount | type | note | createdBy | createdAt | hash |
-|---|---|---|---|---|---|---|---|---|
+
+| id  | kidId | date | amount | type | note | createdBy | createdAt | hash |
+| --- | ----- | ---- | ------ | ---- | ---- | --------- | --------- | ---- |
 
 - `amount`: decimal, positive = deposit, negative = withdrawal
 - `type`: `allowance` / `deposit` / `withdrawal` / `adjustment`
@@ -68,8 +72,9 @@ Tabs (row 1 = headers):
 - Balance = sum of `amount` for the kid. Never stored.
 
 ### `goals`
-| id | kidId | name | price | status | createdAt | updatedAt | hash |
-|---|---|---|---|---|---|---|---|
+
+| id  | kidId | name | price | status | createdAt | updatedAt | hash |
+| --- | ----- | ---- | ----- | ------ | --------- | --------- | ---- |
 
 - `status`: `active` / `done` / `deleted`
 - Goal price is in the kid's currency.
