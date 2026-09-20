@@ -13,13 +13,13 @@ export default tseslint.config(
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'react-refresh/only-export-components': 'off',
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      'no-restricted-imports': [
+      '@typescript-eslint/no-restricted-imports': [
         'error',
         {
           patterns: [
@@ -36,15 +36,25 @@ export default tseslint.config(
     // The layering rule above only applies to domain/. Relax it elsewhere.
     files: ['src/**/*.{ts,tsx}'],
     ignores: ['src/domain/**'],
-    rules: { 'no-restricted-imports': 'off' },
+    rules: { '@typescript-eslint/no-restricted-imports': 'off' },
   },
   {
     files: ['src/ui/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': [
+      // Runtime imports of the Google layer are for state/ and data/. Types are fine.
+      '@typescript-eslint/no-restricted-imports': [
         'error',
-        { patterns: [{ group: ['**/google/*'], message: 'ui/ goes through state/ and data/' }] },
+        {
+          patterns: [
+            {
+              group: ['**/google/*'],
+              allowTypeImports: true,
+              message: 'ui/ goes through state/ and data/',
+            },
+          ],
+        },
       ],
+      'react-refresh/only-export-components': 'off',
     },
   },
 );

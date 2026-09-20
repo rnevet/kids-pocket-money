@@ -187,6 +187,15 @@ Rule: `domain/` imports nothing from `google/`, `data/` or React.
 - Run the acceptance criteria list from the spec end to end and record the
   results in the PR.
 
+## Status
+
+- Done: steps 0-8 have a first implementation. All screens exist, i18n en/he, theme,
+  sharing, join flow, PWA manifest and service worker. 72 unit and UI tests run
+  against an in-memory Sheets fake.
+- Not done: nothing has been run against real Google APIs yet. First manual
+  session needs a Cloud project (README) and will likely surface Picker and
+  token-refresh quirks. Playwright smoke test not written.
+
 ## Known risks
 
 - The row hash is public and unsalted. It is tamper evidence, not tamper
