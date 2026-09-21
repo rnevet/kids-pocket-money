@@ -14,3 +14,13 @@ export function topActiveGoal(goals: readonly Goal[], kidId: string): Goal | und
     .filter((g) => g.kidId === kidId && g.status === 'active')
     .sort((a, b) => (a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0))[0];
 }
+
+/**
+ * Paydays still needed to afford `remaining`, assuming nothing is spent in
+ * between. null when there is no allowance to count on.
+ */
+export function paydaysToGoal(remaining: Minor, allowanceAmount: Minor): number | null {
+  if (allowanceAmount <= 0) return null;
+  if (remaining <= 0) return 0;
+  return Math.ceil(remaining / allowanceAmount);
+}

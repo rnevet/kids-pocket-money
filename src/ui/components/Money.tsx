@@ -6,11 +6,14 @@ export function Money({
   currency,
   big = false,
   signed = false,
+  className,
 }: {
   minor: Minor;
   currency: string;
   big?: boolean;
+  /** Show a leading "+" and colour money that came in. Money that went out stays ink. */
   signed?: boolean;
+  className?: string;
 }) {
   const f = useFormat();
   const cls = [
@@ -18,6 +21,7 @@ export function Money({
     big && 'money--big',
     signed && minor > 0 && 'money--positive',
     signed && minor < 0 && 'money--negative',
+    className,
   ]
     .filter(Boolean)
     .join(' ');

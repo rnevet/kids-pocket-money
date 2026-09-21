@@ -28,6 +28,7 @@ export function App() {
             <Route path="/" element={<Home />} />
             <Route path="/kids/new" element={<KidFormScreen />} />
             <Route path="/kids/:id" element={<KidDetail />} />
+            <Route path="/kids/:id/add" element={<KidDetail openAdd />} />
             <Route path="/kids/:id/edit" element={<KidFormScreen />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -2,7 +2,7 @@ export type ThemePref = 'system' | 'light' | 'dark';
 export type ResolvedTheme = 'light' | 'dark';
 
 const STORAGE_KEY = 'pm.theme';
-const COLORS: Record<ResolvedTheme, string> = { light: '#ffffff', dark: '#111827' };
+const COLORS: Record<ResolvedTheme, string> = { light: '#faf6ee', dark: '#1a1712' };
 const media = () => window.matchMedia('(prefers-color-scheme: dark)');
 
 export function getThemePref(): ThemePref {

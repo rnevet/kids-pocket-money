@@ -21,7 +21,7 @@ async function signInAndCreateFamily(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText('Name'), 'Noa');
   await user.selectOptions(screen.getByLabelText('Frequency'), 'none');
   await user.click(screen.getByRole('button', { name: 'Create' }));
-  await screen.findByRole('heading', { name: 'Nevet' });
+  await screen.findByRole('heading', { name: 'Bank of Nevet' });
 }
 
 describe('App (parent)', () => {
@@ -36,25 +36,25 @@ describe('App (parent)', () => {
     await signInAndCreateFamily(user);
 
     // Home shows the kid with a zero balance in ILS.
-    const card = screen.getByRole('link', { name: /Noa/ });
+    const card = screen.getByRole('link', { name: /^Noa/ });
     expect(within(card).getByText('₪0.00')).toBeInTheDocument();
     expect(fileIdStore.get()).toBe('sheet-1');
 
     // Deposit 12.50
     await user.click(card);
-    await user.click(await screen.findByRole('button', { name: 'Deposit' }));
-    await user.type(screen.getByLabelText(/Amount/), '12,5');
-    await user.type(screen.getByLabelText('Note'), 'birthday');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(await screen.findByRole('button', { name: 'Got money' }));
+    await user.type(screen.getByLabelText('How much'), '12,5');
+    await user.type(screen.getByLabelText('What for'), 'birthday');
+    await user.click(screen.getByRole('button', { name: 'Add ₪12.50 to Noa' }));
     await waitFor(() =>
       expect(screen.getByText('₪12.50', { selector: '.money--big' })).toBeInTheDocument(),
     );
     expect(screen.getByText('birthday')).toBeInTheDocument();
 
     // Withdraw 2
-    await user.click(screen.getByRole('button', { name: 'Withdraw' }));
-    await user.type(screen.getByLabelText(/Amount/), '2');
-    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await user.click(screen.getByRole('button', { name: 'Spent money' }));
+    await user.type(screen.getByLabelText('How much'), '2');
+    await user.click(screen.getByRole('button', { name: 'Take ₪2.00 from Noa' }));
     await waitFor(() =>
       expect(screen.getByText('₪10.50', { selector: '.money--big' })).toBeInTheDocument(),
     );
@@ -64,20 +64,20 @@ describe('App (parent)', () => {
     await user.type(screen.getByLabelText('What is it?'), 'Lego');
     await user.type(screen.getByLabelText(/Price/), '21');
     await user.click(screen.getByRole('button', { name: 'Save' }));
-    await screen.findByText('Lego');
-    expect(screen.getByRole('progressbar', { name: 'Lego' })).toHaveAttribute(
-      'aria-valuenow',
-      '50',
-    );
+    // The goal shows on the hero card and in the goals list.
+    expect(await screen.findAllByText('Lego')).toHaveLength(2);
+    for (const bar of screen.getAllByRole('progressbar', { name: 'Lego' }))
+      expect(bar).toHaveAttribute('aria-valuenow', '50');
+    expect(screen.getByText('₪10.50 saved · of ₪21.00')).toBeInTheDocument();
 
     // Tamper with the deposit row by hand: it is ignored and reported.
     const txRows = sheets.tabs.get('transactions')!;
     txRows[1]![3] = '999.00';
     await user.click(screen.getByRole('link', { name: 'Back' }));
-    await user.click(await screen.findByRole('button', { name: 'Retry' })); // refresh
+    await user.click(await screen.findByRole('button', { name: 'Refresh' }));
     await screen.findByText('1 row in the sheet was ignored');
     expect(
-      within(screen.getByRole('link', { name: /Noa/ })).getByText('-₪2.00'),
+      within(screen.getByRole('link', { name: /^Noa/ })).getByText('-₪2.00'),
     ).toBeInTheDocument();
   });
 
@@ -133,11 +133,12 @@ describe('App (kid viewer)', () => {
       </AppProvider>,
     );
     await user.click(screen.getByRole('button', { name: 'Sign in with Google' }));
-    await screen.findByRole('heading', { name: 'Nevet' });
-    expect(screen.queryByRole('link', { name: 'Add kid' })).not.toBeInTheDocument();
-    await user.click(screen.getByRole('link', { name: /Noa/ }));
-    await screen.findByText('Balance');
-    expect(screen.queryByRole('button', { name: 'Deposit' })).not.toBeInTheDocument();
+    await screen.findByRole('heading', { name: 'Bank of Nevet' });
+    expect(screen.queryByRole('link', { name: /Open an account/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Money for Noa' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('link', { name: /^Noa/ }));
+    await screen.findByText('You have');
+    expect(screen.queryByRole('button', { name: 'Got money' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Add goal' })).not.toBeInTheDocument();
   });
 });
@@ -162,7 +163,7 @@ describe('returning user', () => {
         <App />
       </AppProvider>,
     );
-    await screen.findByRole('heading', { name: 'Auto' });
+    await screen.findByRole('heading', { name: 'Bank of Auto' });
     expect(screen.queryByRole('button', { name: 'Sign in with Google' })).not.toBeInTheDocument();
   });
 });

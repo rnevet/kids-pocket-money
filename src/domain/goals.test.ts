@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { goalProgress, topActiveGoal } from './goals';
+import { goalProgress, paydaysToGoal, topActiveGoal } from './goals';
 import type { Goal } from './schema';
 
 const g = (id: string, status: Goal['status'], createdAt: string, kidId = 'k'): Goal => ({
@@ -28,5 +28,12 @@ describe('goals', () => {
     ];
     expect(topActiveGoal(goals, 'k')?.id).toBe('old');
     expect(topActiveGoal(goals, 'none')).toBeUndefined();
+  });
+  it('counts the paydays still needed for a goal', () => {
+    expect(paydaysToGoal(24750, 3000)).toBe(9);
+    expect(paydaysToGoal(3000, 3000)).toBe(1);
+    expect(paydaysToGoal(0, 3000)).toBe(0);
+    expect(paydaysToGoal(-500, 3000)).toBe(0);
+    expect(paydaysToGoal(24750, 0)).toBeNull();
   });
 });

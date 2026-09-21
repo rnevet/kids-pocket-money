@@ -12,6 +12,7 @@ Spec: [docs/SPEC.md](docs/SPEC.md). Plan: [docs/PLAN.md](docs/PLAN.md).
 
 Vite, React, TypeScript, i18next (English, Hebrew, RTL), Google Identity
 Services, Google Sheets / Drive / Picker APIs, PWA. Hosted as static files.
+The UI font is Rubik (SIL Open Font License), self-hosted from `public/fonts`.
 
 ## Run your own copy
 
