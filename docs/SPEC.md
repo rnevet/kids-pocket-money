@@ -30,7 +30,7 @@ Only `https://www.googleapis.com/auth/drive.file` (non-sensitive).
 The app can access only files it created or files the user picked via Google Picker.
 Sheets API calls work with this scope.
 
-Access tokens expire after ~1 hour. Re-request silently (`prompt: ''`) on 401 and retry once. If silent refresh fails, show a "Sign in again" button.
+Access tokens expire after ~1 hour. The token and the account email are kept in localStorage so a reload within the hour needs no interaction. After expiry, or on a 401, re-request silently (`prompt: ''`, `hint: <email>`) and retry once. Browsers may block that popup when no click preceded it; then show a "Sign in again" button.
 
 ## Data model (Google Sheet)
 

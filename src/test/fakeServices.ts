@@ -5,7 +5,7 @@ import type { Drive, DriveFile, Permission } from '../google/drive';
 import type { Services } from '../state/services';
 import { FakeSheets } from './fakeSheets';
 
-export function fakeServices(opts: { canEdit?: boolean; email?: string } = {}) {
+export function fakeServices(opts: { canEdit?: boolean; email?: string; signedIn?: boolean } = {}) {
   const sheets = new FakeSheets();
   const files = new Map<string, DriveFile>();
   const permissions: Permission[] = [
@@ -16,18 +16,24 @@ export function fakeServices(opts: { canEdit?: boolean; email?: string } = {}) {
       emailAddress: opts.email ?? 'parent@example.com',
     },
   ];
-  let signedIn = false;
+  let signedIn = opts.signedIn ?? false;
+  let hint: string | null = opts.signedIn ? (opts.email ?? 'parent@example.com') : null;
 
   const auth: AuthClient = {
     getToken: () => (signedIn ? 'token' : null),
     refreshSilently: async () => (signedIn ? 'token' : null),
     isSignedIn: () => signedIn,
+    hasSession: () => hint !== null,
+    remember: (email) => {
+      hint = email;
+    },
     signIn: async () => {
       signedIn = true;
       return 'token';
     },
     signOut: async () => {
       signedIn = false;
+      hint = null;
     },
   };
 

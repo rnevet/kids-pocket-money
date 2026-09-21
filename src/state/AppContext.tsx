@@ -95,7 +95,7 @@ function clearJoinFromUrl() {
 
 export function AppProvider({ services, children }: { services: Services; children: ReactNode }) {
   const { auth, drive, repo, sheets, config } = services;
-  const [session, setSession] = useState<Session>({ status: 'signed_out' });
+  const [session, setSession] = useState<Session>({ status: 'booting' });
   const [busy, setBusy] = useState(false);
   const userRef = useRef<DriveUser | null>(null);
   const fileRef = useRef<DriveFile | null>(null);
@@ -196,6 +196,7 @@ export function AppProvider({ services, children }: { services: Services; childr
           await auth.signIn();
           const { user } = await drive.about();
           userRef.current = user;
+          auth.remember(user.emailAddress);
           await resolve();
         }),
 
@@ -325,10 +326,36 @@ export function AppProvider({ services, children }: { services: Services; childr
     [auth, drive, sheets, repo, config, run, mutate, resolve, loadFile],
   );
 
-  // Ready sessions with an expired token should show the re-sign-in screen on the next action;
-  // nothing to do proactively since tokens live only in memory.
+  // On load: reuse a stored token, or try a silent refresh for a returning
+  // user. Browsers may block that popup without a click; then the sign-in
+  // button is the fallback.
   useEffect(() => {
     document.title = i18n.t('app.name');
+    let cancelled = false;
+    (async () => {
+      if (!auth.hasSession() && !auth.isSignedIn()) {
+        setSession({ status: 'signed_out' });
+        return;
+      }
+      try {
+        const token = auth.getToken() ?? (await auth.refreshSilently());
+        if (cancelled) return;
+        if (!token) {
+          setSession({ status: 'signed_out', reason: 'expired' });
+          return;
+        }
+        const { user } = await drive.about();
+        userRef.current = user;
+        auth.remember(user.emailAddress);
+        await resolve();
+      } catch (e) {
+        if (!cancelled) fail(e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const value = useMemo(() => ({ session, busy, actions }), [session, busy, actions]);

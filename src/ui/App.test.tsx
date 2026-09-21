@@ -142,6 +142,31 @@ describe('App (kid viewer)', () => {
   });
 });
 
+describe('returning user', () => {
+  it('skips the sign-in screen when a token is stored', async () => {
+    const { services, files } = fakeServices({ signedIn: true });
+    files.set('sheet-1', {
+      id: 'sheet-1',
+      name: 'Pocket Money',
+      capabilities: { canEdit: true, canShare: true },
+    });
+    fileIdStore.set('sheet-1');
+    // Prepare a valid sheet.
+    const { createFamilySheet } = await import('../data/bootstrap');
+    await createFamilySheet(services.sheets, services.drive, {
+      familyName: 'Auto',
+      defaultCurrency: 'EUR',
+    });
+    render(
+      <AppProvider services={services}>
+        <App />
+      </AppProvider>,
+    );
+    await screen.findByRole('heading', { name: 'Auto' });
+    expect(screen.queryByRole('button', { name: 'Sign in with Google' })).not.toBeInTheDocument();
+  });
+});
+
 describe('join link', () => {
   it('offers to open the shared sheet', async () => {
     const user = userEvent.setup();
