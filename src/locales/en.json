@@ -131,7 +131,11 @@
     "inviteLinkHint": "Send this link to the person you invited. They sign in with Google and confirm the shared sheet once.",
     "copyLink": "Copy link",
     "copied": "Copied",
-    "share": "Share"
+    "share": "Share",
+    "shareText": "Join our family pocket-money app: {{url}}",
+    "invited": "{{email}} was invited. Send them the link so they can open the app.",
+    "privacy": "Privacy",
+    "terms": "Terms"
   },
   "warnings": {
     "title_one": "{{count}} row in the sheet was ignored",

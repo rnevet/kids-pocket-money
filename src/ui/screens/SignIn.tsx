@@ -25,6 +25,10 @@ export function SignIn({ expired }: { expired: boolean }) {
         <button type="button" className="button button--primary" onClick={click} disabled={busy}>
           {expired ? t('signin.again') : t('signin.button')}
         </button>
+        <p className="small muted" style={{ marginBlockStart: '2rem' }}>
+          <a href="/privacy/">{t('settings.privacy')}</a> ·{' '}
+          <a href="/terms/">{t('settings.terms')}</a>
+        </p>
       </div>
     </main>
   );

@@ -63,6 +63,7 @@ function MembersSection() {
   const [role, setRole] = useState<ShareRole>('reader');
   const [error, setError] = useState<AppError | null>(null);
   const [working, setWorking] = useState(false);
+  const [justInvited, setJustInvited] = useState<string | null>(null);
 
   const load = () => actions.listMembers().then(setMembers).catch(setError);
   useEffect(() => {
@@ -76,10 +77,12 @@ function MembersSection() {
     e.preventDefault();
     setWorking(true);
     setError(null);
+    const target = email.trim();
     actions
-      .invite(email.trim(), role)
+      .invite(target, role)
       .then(() => {
         setEmail('');
+        setJustInvited(target);
         return load();
       })
       .catch(setError)
@@ -145,17 +148,16 @@ function MembersSection() {
           {t('settings.invite')}
         </button>
       </form>
-      <InviteLink />
+      <InviteLink highlight={justInvited} />
     </section>
   );
 }
 
-function InviteLink() {
+function InviteLink({ highlight }: { highlight: string | null }) {
   const { t } = useTranslation();
   const { actions } = useFamily();
   const [copied, setCopied] = useState(false);
   const url = actions.inviteLink();
-  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(url);
@@ -165,10 +167,23 @@ function InviteLink() {
       /* clipboard blocked; the input below is selectable */
     }
   };
-  const share = () => navigator.share({ title: t('app.name'), url }).catch(() => undefined);
+  const share = async () => {
+    if (typeof navigator.share === 'function') {
+      await navigator
+        .share({ title: t('app.name'), text: t('settings.shareText', { url }), url })
+        .catch(() => undefined);
+    } else {
+      await copy();
+    }
+  };
   return (
     <div className="field" style={{ marginBlockStart: '1rem' }}>
       <label htmlFor="inviteLink">{t('settings.inviteLink')}</label>
+      {highlight && (
+        <p className="banner banner--warning small">
+          {t('settings.invited', { email: highlight })}
+        </p>
+      )}
       <input
         id="inviteLink"
         readOnly
@@ -178,14 +193,12 @@ function InviteLink() {
       />
       <span className="field__hint">{t('settings.inviteLinkHint')}</span>
       <div className="button-row">
+        <button type="button" className="button button--primary" onClick={() => void share()}>
+          {t('settings.share')}
+        </button>
         <button type="button" className="button" onClick={() => void copy()}>
           {copied ? t('settings.copied') : t('settings.copyLink')}
         </button>
-        {canShare && (
-          <button type="button" className="button" onClick={share}>
-            {t('settings.share')}
-          </button>
-        )}
       </div>
     </div>
   );
