@@ -1,5 +1,7 @@
 # Pocket Money
 
+Live: <https://pocketmoney.nevet.me>
+
 A family pocket-money ledger. The parent is the bank; the app records a virtual
 balance per kid. All data lives in one Google Sheet in the parent's Google
 Drive. No backend.
