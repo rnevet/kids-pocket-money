@@ -9,7 +9,15 @@ export type Session =
   | { status: 'resolving'; user: DriveUser }
   | { status: 'no_family'; user: DriveUser; joinFileId: string | null }
   | { status: 'choose'; user: DriveUser; files: DriveFile[] }
-  | { status: 'ready'; user: DriveUser; file: DriveFile; role: Role; family: Family }
+  | {
+      status: 'ready';
+      user: DriveUser;
+      file: DriveFile;
+      role: Role;
+      family: Family;
+      /** When the sheet was last read, epoch ms. */
+      loadedAt: number;
+    }
   | { status: 'error'; user: DriveUser | null; error: AppError };
 
 export function sheetUrl(fileId: string): string {

@@ -121,7 +121,7 @@ export function AppProvider({ services, children }: { services: Services; childr
       fileIdStore.set(file.id);
       const role = roleOf(file);
       let family: Family = await repo.loadFamily(file.id);
-      setSession({ status: 'ready', user, file, role, family });
+      setSession({ status: 'ready', user, file, role, family, loadedAt: Date.now() });
 
       if (
         role === 'parent' &&
@@ -132,7 +132,7 @@ export function AppProvider({ services, children }: { services: Services; childr
         family = await repo.loadFamily(file.id);
         const n = await creditAllowances(repo, family, todayIso(), user.emailAddress);
         if (n > 0) family = await repo.loadFamily(file.id);
-        setSession({ status: 'ready', user, file, role, family });
+        setSession({ status: 'ready', user, file, role, family, loadedAt: Date.now() });
       }
     },
     [repo],

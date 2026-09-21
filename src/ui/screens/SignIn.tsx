@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useApp } from '../../state/AppContext';
 import type { AppError } from '../../google/errors';
 import { ErrorBanner } from '../components/Banners';
+import { Logo } from '../components/Icon';
 
 export function SignIn({ expired }: { expired: boolean }) {
   const { t } = useTranslation();
@@ -15,8 +16,8 @@ export function SignIn({ expired }: { expired: boolean }) {
   return (
     <main className="app hero">
       <div>
-        <div className="hero__icon" aria-hidden="true">
-          🐷
+        <div className="hero__icon">
+          <Logo size={96} />
         </div>
         <h1>{t('signin.title')}</h1>
         <p className="muted">{t('signin.tagline')}</p>

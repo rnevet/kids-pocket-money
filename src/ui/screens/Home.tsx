@@ -7,64 +7,96 @@ import type { Kid } from '../../domain/schema';
 import { useFamily } from '../../state/AppContext';
 import { sheetUrl } from '../../state/session';
 import { WarningsBanner } from '../components/Banners';
+import { Icon, Logo } from '../components/Icon';
 import { Money } from '../components/Money';
 import { ProgressBar } from '../components/ProgressBar';
 import { TopBar } from '../components/TopBar';
-import { useFormat } from '../format';
+import { kidTint, useFormat, useNow, useWords } from '../format';
 
-function KidCard({ kid }: { kid: Kid }) {
+/** "Updated just now", "Updated 3 min ago", "Updated at 14:05". */
+export function Updated({ at }: { at: number }) {
   const { t } = useTranslation();
   const f = useFormat();
-  const { family } = useFamily();
+  const now = useNow();
+  const minutes = Math.floor((now - at) / 60_000);
+  if (minutes < 1) return <>{t('home.updatedNow')}</>;
+  if (minutes < 60) return <>{t('home.updatedMinutes', { count: minutes })}</>;
+  return <>{t('home.updatedAt', { time: f.time(at) })}</>;
+}
+
+function AccountCard({ kid }: { kid: Kid }) {
+  const { t } = useTranslation();
+  const words = useWords();
+  const { family, isParent } = useFamily();
   const balance = family.balances.get(kid.id) ?? 0;
   const today = todayIso();
+  const goal = topActiveGoal(family.goals, kid.id);
   const next = nextPayday(
     { frequency: kid.allowanceFrequency, day: kid.allowanceDay, startDate: kid.startDate },
     today,
   );
-  const goal = topActiveGoal(family.goals, kid.id);
-  let sub = t('home.noAllowance');
-  if (next) {
+
+  let sub: string;
+  if (goal) {
+    sub = `${goal.name} · ${words.goalForecast(kid, balance, goal)}`;
+  } else if (next) {
     const days = daysBetween(today, next);
     sub = days === 0 ? t('home.nextPaydayToday') : t('home.nextPaydayDays', { count: days });
+  } else {
+    sub = t('home.noAllowance');
   }
+
+  const canAdd = isParent && !kid.archived;
+  const cls = `account tint-${kidTint(family.kids, kid.id)}`;
   return (
-    <Link to={`/kids/${kid.id}`} className="card kid-card">
-      <div className="kid-card__avatar" aria-hidden="true">
-        {kid.avatar || '🙂'}
-      </div>
-      <div>
-        <p className="kid-card__name">
-          {kid.name} {kid.archived && <span className="badge">{t('kid.archivedBadge')}</span>}
-        </p>
-        <p className="kid-card__sub">{sub}</p>
-      </div>
-      <Money minor={balance} currency={kid.currency} />
-      {goal && (
-        <div className="kid-card__goal">
-          <p className="kid-card__sub">
-            {goal.name} ·{' '}
-            {t('goal.progress', {
-              percent: f.percent(goalProgress(balance, goal.price)),
-              price: f.money(goal.price, kid.currency),
-            })}
+    <div className={cls}>
+      <Link to={`/kids/${kid.id}`} className="account__body">
+        <div className="avatar" aria-hidden="true">
+          {kid.avatar || '🙂'}
+        </div>
+        <div className="account__text">
+          <p className="account__name">
+            {kid.name} {kid.archived && <span className="badge">{t('kid.archivedBadge')}</span>}
           </p>
-          <ProgressBar value={goalProgress(balance, goal.price)} label={goal.name} />
+          <p className="account__sub">{sub}</p>
+        </div>
+        <Money minor={balance} currency={kid.currency} className="account__balance" />
+      </Link>
+      {(goal || canAdd) && (
+        <div className="account__foot">
+          {goal ? (
+            <ProgressBar value={goalProgress(balance, goal.price)} label={goal.name} />
+          ) : (
+            <span className="account__sub">{words.allowance(kid) ?? ''}</span>
+          )}
+          {canAdd && (
+            <Link
+              to={`/kids/${kid.id}/add`}
+              className="pill pill--ink account__add"
+              aria-label={t('home.moneyFor', { name: kid.name })}
+            >
+              <Icon name="plus" size={14} strokeWidth={2.8} />
+              {t('home.money')}
+            </Link>
+          )}
         </div>
       )}
-    </Link>
+    </div>
   );
 }
 
 export function Home() {
   const { t } = useTranslation();
-  const { family, isParent, actions, busy } = useFamily();
+  const { family, isParent, actions, busy, loadedAt } = useFamily();
   const active = family.kids.filter((k) => !k.archived);
   const archived = family.kids.filter((k) => k.archived);
+  const name = family.settings.familyName;
   return (
     <main className="app">
       <TopBar
-        title={family.settings.familyName || t('app.name')}
+        title={name ? t('home.bank', { name }) : t('app.name')}
+        subtitle={<Updated at={loadedAt} />}
+        leading={<Logo size={40} />}
         actions={
           <>
             <button
@@ -72,33 +104,40 @@ export function Home() {
               className="icon-button"
               onClick={() => void actions.refresh()}
               disabled={busy}
-              aria-label={t('app.retry')}
+              aria-label={t('home.refresh')}
             >
-              ↻
+              <Icon name="refresh" />
             </button>
             <Link to="/settings" className="icon-button" aria-label={t('settings.title')}>
-              ⚙️
+              <Icon name="settings" />
             </Link>
           </>
         }
       />
       <WarningsBanner warnings={family.warnings} sheetUrl={sheetUrl(family.fileId)} />
       {active.length === 0 && <p className="muted center">{t('home.empty')}</p>}
-      {active.map((k) => (
-        <KidCard key={k.id} kid={k} />
-      ))}
+      <div className="stack">
+        {active.map((k) => (
+          <AccountCard key={k.id} kid={k} />
+        ))}
+        {isParent && (
+          <Link to="/kids/new" className="account-add">
+            <Icon name="plus" size={18} strokeWidth={2.5} />
+            {t('home.addKid')}
+          </Link>
+        )}
+      </div>
       {archived.length > 0 && (
         <details className="section">
-          <summary className="muted">{t('home.archived')}</summary>
-          {archived.map((k) => (
-            <KidCard key={k.id} kid={k} />
-          ))}
+          <summary className="section__summary muted">
+            {t('home.archived', { count: archived.length })}
+          </summary>
+          <div className="stack" style={{ marginBlockStart: '0.75rem' }}>
+            {archived.map((k) => (
+              <AccountCard key={k.id} kid={k} />
+            ))}
+          </div>
         </details>
-      )}
-      {isParent && (
-        <Link to="/kids/new" className="button button--primary fab" aria-label={t('home.addKid')}>
-          +
-        </Link>
       )}
     </main>
   );

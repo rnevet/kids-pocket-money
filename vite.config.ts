@@ -16,8 +16,8 @@ export default defineConfig({
         description: 'Family pocket-money ledger stored in your own Google Sheet',
         start_url: '/',
         display: 'standalone',
-        background_color: '#ffffff',
-        theme_color: '#2563eb',
+        background_color: '#faf6ee',
+        theme_color: '#0f6e56',
         icons: [
           { src: 'icons/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
           {

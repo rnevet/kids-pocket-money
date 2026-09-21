@@ -1,38 +1,103 @@
+/* Rubik covers Latin and Hebrew with the same weights and tabular figures. */
+@font-face {
+  font-family: Rubik;
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/rubik-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: Rubik;
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/rubik-hebrew.woff2') format('woff2');
+  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+
 :root {
-  --bg: #fff;
-  --bg-elevated: #f7f7f8;
-  --fg: #111827;
-  --fg-muted: #6b7280;
-  --border: #e5e7eb;
-  --primary: #2563eb;
+  /* Paper */
+  --bg: #faf6ee;
+  --bg-elevated: #fff;
+  --bg-sunken: #f1eadb;
+  --fg: #1f1a12;
+  --fg-muted: #6b6255;
+  --fg-faint: #a69b88;
+  --border: #eadfcb;
+  --border-dashed: #d9ccb0;
+
+  /* Bank green for actions */
+  --primary: #0f6e56;
+  --primary-strong: #0b5643;
   --primary-fg: #fff;
-  --positive: #15803d;
-  --negative: #b91c1c;
-  --warning-bg: #fef3c7;
-  --warning-fg: #78350f;
-  --danger-bg: #fee2e2;
-  --danger-fg: #7f1d1d;
-  --radius: 12px;
-  --shadow: 0 1px 2px rgb(0 0 0 / 6%);
+  --primary-tint: #d9efe6;
+
+  /* The coin: progress and allowance only */
+  --coin: #f2a91e;
+  --coin-tint: #fdebc8;
+  --coin-fg: #8a5a00;
+  --positive: #0f6e56;
+  --negative: #1f1a12;
+  --track: rgb(255 255 255 / 70%);
+
+  /* One colour per kid account */
+  --tint-1: #f8e3b8;
+  --tint-1-fg: #6b4a08;
+  --tint-2: #cfebdd;
+  --tint-2-fg: #0b5643;
+  --tint-3: #e3ddf5;
+  --tint-3-fg: #4c3f86;
+  --tint-4: #f9d5cf;
+  --tint-4-fg: #8a2f22;
+  --warning-bg: #fdebc8;
+  --warning-fg: #6b4a08;
+  --danger-bg: #fbe3e3;
+  --danger-fg: #8a2323;
+  --radius: 22px;
+  --radius-sm: 14px;
+  --radius-xs: 12px;
+  --shadow-sheet: 0 -12px 40px rgb(31 26 18 / 20%);
+  --font: 'Rubik', system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Noto Sans Hebrew', sans-serif;
 
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
-  --bg: #111827;
-  --bg-elevated: #1f2937;
-  --fg: #f9fafb;
-  --fg-muted: #9ca3af;
-  --border: #374151;
-  --primary: #60a5fa;
-  --primary-fg: #0b1220;
-  --positive: #4ade80;
-  --negative: #f87171;
-  --warning-bg: #422006;
-  --warning-fg: #fde68a;
-  --danger-bg: #450a0a;
-  --danger-fg: #fecaca;
-  --shadow: 0 1px 2px rgb(0 0 0 / 40%);
+  /* Night */
+  --bg: #1a1712;
+  --bg-elevated: #26211a;
+  --bg-sunken: #332d24;
+  --fg: #f3ede0;
+  --fg-muted: #b3a996;
+  --fg-faint: #7d7462;
+  --border: #3a342a;
+  --border-dashed: #4a4336;
+  --primary: #2fa583;
+  --primary-strong: #7fd7b5;
+  --primary-fg: #0f1f19;
+  --primary-tint: #1d3f31;
+  --coin-tint: #4a3a14;
+  --coin-fg: #f5c04b;
+  --positive: #5cc9a5;
+  --negative: #f3ede0;
+  --track: rgb(255 255 255 / 15%);
+  --tint-1: #4a3a14;
+  --tint-1-fg: #f5c04b;
+  --tint-2: #1d3f31;
+  --tint-2-fg: #7fd7b5;
+  --tint-3: #2f2a4d;
+  --tint-3-fg: #c3b8f0;
+  --tint-4: #4a2a26;
+  --tint-4-fg: #f5b3a8;
+  --warning-bg: #4a3a14;
+  --warning-fg: #f5c04b;
+  --danger-bg: #4a2222;
+  --danger-fg: #f5b3a8;
+  --shadow-sheet: 0 -12px 40px rgb(0 0 0 / 50%);
 
   color-scheme: dark;
 }
