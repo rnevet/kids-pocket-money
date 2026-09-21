@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { nextPayday } from '../../domain/allowance';
+import { hasAllowance, nextPayday } from '../../domain/allowance';
 import { daysBetween, todayIso } from '../../domain/dates';
 import { goalProgress, topActiveGoal } from '../../domain/goals';
 import type { Kid } from '../../domain/schema';
@@ -31,10 +31,12 @@ function AccountCard({ kid }: { kid: Kid }) {
   const balance = family.balances.get(kid.id) ?? 0;
   const today = todayIso();
   const goal = topActiveGoal(family.goals, kid.id);
-  const next = nextPayday(
-    { frequency: kid.allowanceFrequency, day: kid.allowanceDay, startDate: kid.startDate },
-    today,
-  );
+  const next = hasAllowance({ frequency: kid.allowanceFrequency, amount: kid.allowanceAmount })
+    ? nextPayday(
+        { frequency: kid.allowanceFrequency, day: kid.allowanceDay, startDate: kid.startDate },
+        today,
+      )
+    : null;
 
   let sub: string;
   if (goal) {

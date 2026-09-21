@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { allowanceTxId, isValidDay, nextPayday, paydays, type Schedule } from './allowance';
+import {
+  allowanceTxId,
+  hasAllowance,
+  isValidDay,
+  nextPayday,
+  paydays,
+  type Schedule,
+} from './allowance';
 import { addDays, weekday } from './dates';
 
 const TODAY = '2026-09-20'; // Sunday
@@ -79,5 +86,10 @@ describe('nextPayday', () => {
 describe('allowanceTxId', () => {
   it('is deterministic', () => {
     expect(allowanceTxId('k1', '2026-09-20')).toBe('allowance:k1:2026-09-20');
+  });
+  it('an allowance of zero is no allowance', () => {
+    expect(hasAllowance({ frequency: 'weekly', amount: 3000 })).toBe(true);
+    expect(hasAllowance({ frequency: 'weekly', amount: 0 })).toBe(false);
+    expect(hasAllowance({ frequency: 'none', amount: 3000 })).toBe(false);
   });
 });

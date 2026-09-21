@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { hasAllowance } from '../domain/allowance';
 import { paydaysToGoal } from '../domain/goals';
 import { formatMoney, type Minor } from '../domain/money';
 import type { IsoDate } from '../domain/dates';
@@ -57,8 +58,11 @@ export function useWords() {
     goalForecast: (kid: Kid, balance: Minor, goal: Goal): string => {
       const remaining = goal.price - balance;
       if (remaining <= 0) return t('goal.enough');
-      const n =
-        kid.allowanceFrequency === 'none' ? null : paydaysToGoal(remaining, kid.allowanceAmount);
+      const paying = hasAllowance({
+        frequency: kid.allowanceFrequency,
+        amount: kid.allowanceAmount,
+      });
+      const n = paying ? paydaysToGoal(remaining, kid.allowanceAmount) : null;
       if (n === null) return t('goal.toGo', { amount: f.money(remaining, kid.currency) });
       if (kid.allowanceFrequency === 'weekly')
         return t('goal.weeks', { count: n, weekday: f.weekday(kid.allowanceDay) });
@@ -66,7 +70,8 @@ export function useWords() {
     },
     /** "₪30 every Friday", "₪100 every month", or null without an allowance. */
     allowance: (kid: Kid): string | null => {
-      if (kid.allowanceFrequency === 'none' || kid.allowanceAmount <= 0) return null;
+      if (!hasAllowance({ frequency: kid.allowanceFrequency, amount: kid.allowanceAmount }))
+        return null;
       const amount = f.money(kid.allowanceAmount, kid.currency);
       return kid.allowanceFrequency === 'weekly'
         ? t('home.allowanceWeekly', { amount, weekday: f.weekday(kid.allowanceDay) })
