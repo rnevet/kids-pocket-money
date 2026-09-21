@@ -8,6 +8,25 @@ Drive. No backend.
 
 Spec: [docs/SPEC.md](docs/SPEC.md). Plan: [docs/PLAN.md](docs/PLAN.md).
 
+## Just use it
+
+Open <https://pocketmoney.nevet.me>, sign in with Google, and create your
+family. That is the whole setup.
+
+- The app asks for one permission, `drive.file`: it can see and edit only the
+  sheet it creates for you (or one you open through the Google file picker).
+  It cannot read the rest of your Drive.
+- Your data lives in a Google Sheet in your own Drive. There is no server and
+  no database on our side. Sign out and the app forgets everything except the
+  id of your sheet, which it keeps in your browser to skip the picker next time.
+- Invite the other parent (editor) or a kid (viewer) from Settings. They sign
+  in with their own Google account.
+- Install it as an app from the browser menu (Add to Home Screen) to get an
+  icon on the phone.
+
+If you would rather not depend on a hosted instance, run your own copy below.
+Same code, same sheet format, your own Google Cloud project.
+
 ## Stack
 
 Vite, React, TypeScript, i18next (English, Hebrew, RTL), Google Identity
@@ -37,8 +56,12 @@ Click **Fork** on GitHub. Cloudflare will build from your fork.
    contact, audience **External**. Finish.
 4. Test users: <https://console.cloud.google.com/auth/audience>. Add your
    Google account and any other parent's. Add a kid's account only if that kid
-   has one and should get read-only access. The app stays in _Testing_ status,
-   which allows up to 100 test users and needs no Google review.
+   has one and should get read-only access. In _Testing_ status up to 100
+   test users can sign in. To let anyone sign in, click **Publish app** on
+   the same page. Because the app only asks for the non-sensitive `drive.file`
+   scope, publishing needs no Google review and shows no "unverified app"
+   warning. Google does require a homepage, privacy policy and terms URL under
+   Branding first; this repo serves them at `/privacy/` and `/terms/`.
 5. OAuth client: <https://console.cloud.google.com/auth/clients>. Create
    client, type **Web application**. Under _Authorized JavaScript origins_ add
    `http://localhost:5173`. Leave redirect URIs empty. Save and copy the
@@ -105,3 +128,7 @@ Two parents opening the app at the same moment on a payday can both append the
 same allowance row. Readers keep the first row per id, so balances stay
 correct. The Sheets API has no conditional write, so this cannot be fully
 prevented client-side.
+
+## License
+
+[MIT](LICENSE).
