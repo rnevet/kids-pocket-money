@@ -10,6 +10,11 @@ export interface Schedule {
   startDate: IsoDate;
 }
 
+/** A schedule pays out only when it has a frequency and a positive amount. */
+export function hasAllowance(s: { frequency: Frequency; amount: number }): boolean {
+  return s.frequency !== 'none' && s.amount > 0;
+}
+
 export function allowanceTxId(kidId: string, date: IsoDate): string {
   return `allowance:${kidId}:${date}`;
 }

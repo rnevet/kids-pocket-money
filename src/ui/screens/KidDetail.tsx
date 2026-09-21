@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { sortNewestFirst } from '../../domain/balance';
 import { daysBetween, todayIso } from '../../domain/dates';
-import { nextPayday } from '../../domain/allowance';
+import { hasAllowance, nextPayday } from '../../domain/allowance';
 import { goalProgress, topActiveGoal } from '../../domain/goals';
 import { formatAmountCell, parseUserAmount, type Minor } from '../../domain/money';
 import type { Goal, Kid, Transaction, TxType } from '../../domain/schema';
@@ -254,10 +254,12 @@ function GoalHero({ kid, goal, balance }: { kid: Kid; goal: Goal; balance: Minor
   const words = useWords();
   const allowance = words.allowance(kid);
   const today = todayIso();
-  const next = nextPayday(
-    { frequency: kid.allowanceFrequency, day: kid.allowanceDay, startDate: kid.startDate },
-    today,
-  );
+  const next = hasAllowance({ frequency: kid.allowanceFrequency, amount: kid.allowanceAmount })
+    ? nextPayday(
+        { frequency: kid.allowanceFrequency, day: kid.allowanceDay, startDate: kid.startDate },
+        today,
+      )
+    : null;
   let nextText = '';
   if (next) {
     const days = daysBetween(today, next);
