@@ -31,7 +31,7 @@ export default defineConfig({
       workbox: {
         // App shell only. Never cache Google API responses.
         globPatterns: ['**/*.{js,css,html,svg,woff2}'],
-        navigateFallbackDenylist: [/^\/api/],
+        navigateFallbackDenylist: [/^\/privacy/, /^\/terms/],
       },
     }),
   ],
