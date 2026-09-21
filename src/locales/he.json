@@ -64,8 +64,8 @@
   },
   "kid": {
     "balance": "יש לך",
-    "deposit": "הכנסה",
-    "withdraw": "הוצאה",
+    "deposit": "הפקדה",
+    "withdraw": "משיכה",
     "goals": "יעדים",
     "addGoal": "הוספת יעד",
     "noGoals": "אין יעדים עדיין.",
@@ -79,20 +79,20 @@
   },
   "tx": {
     "allowance": "דמי כיס",
-    "deposit": "הכנסה",
-    "withdrawal": "הוצאה",
+    "deposit": "הפקדה",
+    "withdrawal": "משיכה",
     "adjustment": "תיקון",
     "amount": "כמה",
     "note": "בשביל מה",
     "date": "מתי",
-    "depositTitle": "הכנסה ל{{name}}",
-    "withdrawTitle": "הוצאה של {{name}}",
+    "depositTitle": "הפקדה עבור {{name}}",
+    "withdrawTitle": "משיכה מ{{name}}",
     "invalidAmount": "יש להזין סכום חיובי, למשל 12.50",
     "by": "על ידי {{email}}",
     "kind": "סוג",
     "notePlaceholder": "יום הולדת מסבתא",
-    "submitGot": "הוספת {{amount}} ל{{name}}",
-    "submitSpent": "הורדת {{amount}} מ{{name}}"
+    "submitGot": "הפקדה של {{amount}} ל{{name}}",
+    "submitSpent": "משיכה של {{amount}} מ{{name}}"
   },
   "goal": {
     "title": "יעד חדש",
