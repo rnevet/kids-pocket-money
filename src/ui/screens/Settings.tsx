@@ -145,7 +145,49 @@ function MembersSection() {
           {t('settings.invite')}
         </button>
       </form>
+      <InviteLink />
     </section>
+  );
+}
+
+function InviteLink() {
+  const { t } = useTranslation();
+  const { actions } = useFamily();
+  const [copied, setCopied] = useState(false);
+  const url = actions.inviteLink();
+  const canShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked; the input below is selectable */
+    }
+  };
+  const share = () => navigator.share({ title: t('app.name'), url }).catch(() => undefined);
+  return (
+    <div className="field" style={{ marginBlockStart: '1rem' }}>
+      <label htmlFor="inviteLink">{t('settings.inviteLink')}</label>
+      <input
+        id="inviteLink"
+        readOnly
+        value={url}
+        onFocus={(e) => e.currentTarget.select()}
+        dir="ltr"
+      />
+      <span className="field__hint">{t('settings.inviteLinkHint')}</span>
+      <div className="button-row">
+        <button type="button" className="button" onClick={() => void copy()}>
+          {copied ? t('settings.copied') : t('settings.copyLink')}
+        </button>
+        {canShare && (
+          <button type="button" className="button" onClick={share}>
+            {t('settings.share')}
+          </button>
+        )}
+      </div>
+    </div>
   );
 }
 

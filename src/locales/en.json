@@ -126,7 +126,12 @@
     "openSheet": "Open sheet in Google Sheets",
     "signOut": "Sign out",
     "signedInAs": "Signed in as {{email}}",
-    "readOnly": "You have read-only access."
+    "readOnly": "You have read-only access.",
+    "inviteLink": "Invite link",
+    "inviteLinkHint": "Send this link to the person you invited. They sign in with Google and confirm the shared sheet once.",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "share": "Share"
   },
   "warnings": {
     "title_one": "{{count}} row in the sheet was ignored",

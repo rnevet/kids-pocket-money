@@ -51,6 +51,7 @@ export interface AppActions {
   updateGoal(goal: Goal, expectedUpdatedAt: string): Promise<void>;
   updateSettings(settings: Settings): Promise<void>;
   listMembers(): Promise<Permission[]>;
+  inviteLink(): string;
   invite(email: string, role: ShareRole): Promise<void>;
   removeMember(permissionId: string): Promise<void>;
 }
@@ -296,6 +297,11 @@ export function AppProvider({ services, children }: { services: Services; childr
         const file = fileRef.current;
         if (!file) return [];
         return drive.listPermissions(file.id);
+      },
+
+      inviteLink: () => {
+        const file = fileRef.current;
+        return file ? `${config.appUrl}?join=${encodeURIComponent(file.id)}` : '';
       },
 
       invite: async (email, role) => {

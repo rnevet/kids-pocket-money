@@ -127,7 +127,12 @@
     "openSheet": "פתיחת הגיליון ב-Google Sheets",
     "signOut": "התנתקות",
     "signedInAs": "מחובר/ת בתור {{email}}",
-    "readOnly": "יש לך גישת צפייה בלבד."
+    "readOnly": "יש לך גישת צפייה בלבד.",
+    "inviteLink": "קישור הזמנה",
+    "inviteLinkHint": "שלחו את הקישור למי שהזמנתם. הם מתחברים עם Google ומאשרים את הגיליון המשותף פעם אחת.",
+    "copyLink": "העתקת קישור",
+    "copied": "הועתק",
+    "share": "שיתוף"
   },
   "warnings": {
     "title_one": "שורה אחת בגיליון לא נספרה",
