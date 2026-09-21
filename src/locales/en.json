@@ -23,7 +23,7 @@
   },
   "bootstrap": {
     "noFamily": "No family sheet found",
-    "noFamilyHint": "Create a new family, or open a sheet another parent shared with you.",
+    "noFamilyHint": "Create a new family, or open a sheet another parent shared with you. Invited? Use the link from the invitation email, or choose Open existing and pick the shared sheet under \"Shared with me\".",
     "create": "Create new family",
     "open": "Open existing",
     "choose": "Choose a family",
