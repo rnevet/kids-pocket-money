@@ -16,10 +16,21 @@
   },
   "signin": {
     "title": "Pocket Money",
-    "tagline": "A family pocket-money ledger that lives in your own Google Sheet.",
+    "tagline": "Pocket money for kids, kept in your own Google Sheet.",
     "button": "Sign in with Google",
     "again": "Sign in again",
-    "expired": "Your session expired."
+    "expired": "Your session expired.",
+    "permission": "Sign-in only asks for access to the sheet this app creates. It cannot see the rest of your Drive.",
+    "samplesLabel": "What it looks like",
+    "sampleHome": "The family home screen: one account card per kid with balance and goal progress",
+    "sampleKid": "A kid's screen: the goal, how many paydays to go, the balance and recent money",
+    "bankTitle": "You are the bank",
+    "bankBody": "Record allowance, gifts and spending. No real money moves; the app keeps the score.",
+    "goalTitle": "Kids see their goal",
+    "goalBody": "Their balance, and how many Fridays until the skateboard. Allowance lands by itself on payday.",
+    "sheetTitle": "Your data stays yours",
+    "sheetBody": "Everything lives in one Google Sheet in your Drive. No server, no account with us, open source.",
+    "source": "Source on GitHub"
   },
   "bootstrap": {
     "noFamily": "No family sheet found",
